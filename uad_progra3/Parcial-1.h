@@ -12,13 +12,27 @@ class archivos_obj
 {
 public:
 	archivos_obj();
+	~archivos_obj();
+	vector<float> getModelVertices();
+	int getNumVertices();
+	vector<float> getModelNormals();
+	int getNumNormals();
+	vector<float> getModelUvCoords();
+	int getNumUvCoords();
+	int getNumFaces();
+	vector<unsigned int> getModelVerticexIndices();
+	vector<unsigned int> getModelNormalsIndices();
+	vector<unsigned int> getModelUvCoordsIndices();
 
+private:
 	vector<string> newmtl;
 	vector<string> map_Kd;
 
 	vector<float> vertices;
 	vector<float> normales;
 	vector<float> uvCoords;
+
+	int faces = 0;
 
 	struct Caras
 	{
@@ -29,7 +43,6 @@ public:
 	};
 
 	vector<Caras> v_Caras;
-private:
 	istringstream LectorCaras(string linea);
 	void LectorCarasQuads(string linea);
 	void LectorGeneral(vector<float>& typeVector, ifstream& archivo);
@@ -79,11 +92,13 @@ archivos_obj::archivos_obj()
 			if (contador == 3)
 			{
 				LectorCaras(linea);
+				faces++;
 			}
 			//Quads
 			else if (contador == 4)
 			{
 				LectorCarasQuads(linea);
+				faces++;
 			}
 			else
 			{
@@ -106,6 +121,9 @@ archivos_obj::archivos_obj()
 		}
 	}
 	archivo.close();
+
+	//Imprime todolo que se guardo
+	/*
 	for (int i = 0; i < newmtl.size(); i++)
 	{
 		cout << "newmtl -> " << newmtl[i] << endl;
@@ -143,6 +161,11 @@ archivos_obj::archivos_obj()
 		}
 
 	}
+	*/
+}
+archivos_obj::~archivos_obj()
+{
+
 }
 
 void archivos_obj::LectorMtllib(string nombre_archivo)
@@ -237,4 +260,73 @@ void archivos_obj::LectorCarasQuads(string linea)
 		v_Caras[i].v_ind_uvs.push_back(v_Caras[i].v_ind_uvs[v_Caras[i].v_ind_uvs.size() - 5]);
 		v_Caras[i].v_ind_normales.push_back(v_Caras[i].v_ind_normales[v_Caras[i].v_ind_normales.size() - 5]);
 	}
+}
+
+
+//////////////////////////////////////////////Funciones Publicas///////////////////////////////////////////
+
+
+vector<float> archivos_obj::getModelVertices()
+{
+	return vertices;
+}
+int archivos_obj::getNumVertices()
+{
+	return vertices.size() - 1;
+}
+vector<float> archivos_obj::getModelNormals()
+{
+	return normales;
+}
+int archivos_obj::getNumNormals()
+{
+	return normales.size() - 1;
+}
+vector<float> archivos_obj::getModelUvCoords()
+{
+	return uvCoords;
+}
+int archivos_obj::getNumUvCoords()
+{
+	return uvCoords.size() - 1;
+}
+int archivos_obj::getNumFaces()
+{
+	return faces;
+}
+vector<unsigned int> archivos_obj::getModelVerticexIndices()
+{
+	vector<unsigned int> total;
+	for (int i = 0; i < v_Caras.size(); i++)
+	{
+		for (int x = 0; x < v_Caras[i].v_ind_vertices.size(); x++)
+		{
+			total.push_back(v_Caras[i].v_ind_vertices[x]);
+		}
+	}
+	return total;
+}
+vector<unsigned int> archivos_obj::getModelNormalsIndices()
+{
+	vector<unsigned int> total;
+	for (int i = 0; i < v_Caras.size(); i++)
+	{
+		for (int x = 0; x < v_Caras[i].v_ind_normales.size(); x++)
+		{
+			total.push_back(v_Caras[i].v_ind_normales[x]);
+		}
+	}
+	return total;
+}
+vector<unsigned int> archivos_obj::getModelUvCoordsIndices()
+{
+	vector<unsigned int> total;
+	for (int i = 0; i < v_Caras.size(); i++)
+	{
+		for (int x = 0; x < v_Caras[i].v_ind_uvs.size(); x++)
+		{
+			total.push_back(v_Caras[i].v_ind_uvs[x]);
+		}
+	}
+	return total;
 }
