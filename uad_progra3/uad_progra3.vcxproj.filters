@@ -156,6 +156,9 @@
     <ClInclude Include="Include\Parcial-1.h">
       <Filter>Source Files\Parcial-1</Filter>
     </ClInclude>
+    <ClInclude Include="Include\CAppParcial-2.h">
+      <Filter>Header Files\App</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -229,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="Source\Parcial-1.cpp">
       <Filter>Source Files\Parcial-1</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CAppParcial-2.cpp">
+      <Filter>Source Files\App</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

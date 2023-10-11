@@ -173,6 +173,7 @@
     <ClInclude Include="Include\CAppGeometricFigures.h" />
     <ClInclude Include="Include\CAppObjLoader.h" />
     <ClInclude Include="Include\CAppParcial-1.h" />
+    <ClInclude Include="Include\CAppParcial-2.h" />
     <ClInclude Include="Include\CBinaryTree.h" />
     <ClInclude Include="Include\CBinaryTreeNode.h" />
     <ClInclude Include="Include\CCircularDoubleLinkedList.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Source\CAppGeometricFigures.cpp" />
     <ClCompile Include="Source\CAppObjLoader.cpp" />
     <ClCompile Include="Source\CAppParcial-1.cpp" />
+    <ClCompile Include="Source\CAppParcial-2.cpp" />
     <ClCompile Include="Source\CCircularDoubleLinkedList.cpp" />
     <ClCompile Include="Source\CCircularDoubleLinkedListNode.cpp" />
     <ClCompile Include="Source\CGameMenu.cpp" />
