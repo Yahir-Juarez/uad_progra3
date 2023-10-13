@@ -9,6 +9,8 @@ using namespace std;
 #include "../Include/CTextureLoader.h"
 #include "../Include/CVector3.h"
 
+#include "../Include/MathHelper.h"
+
 /* */
 CAppParcial2::CAppParcial2() :
 	CAppParcial2(CGameWindow::DEFAULT_WINDOW_WIDTH, CGameWindow::DEFAULT_WINDOW_HEIGHT)
@@ -84,6 +86,16 @@ void CAppParcial2::update(double deltaTime)
 	// ===============================
 	//
 	// ===============================
+
+	//Si no funciona multiplicar por .001
+
+	double degress = rotationSpeed * (deltaTime / 1000.0f);
+
+	rotationActual += degress;
+	if (rotationActual >= 360.0)
+	{
+		rotationActual -= 360.0;
+	}
 }
 
 /* */
@@ -100,6 +112,9 @@ void CAppParcial2::render()
 	}
 	else // Otherwise, render app-specific stuff here...
 	{
+
+		double currentRadians = rotationActual * PI_OVER_180;
+
 		// White 
 		// Colors are in the 0..1 range, if you want to use RGB, use (R/255, G/255, G/255)
 		float color[3] = { 1.0f, 1.0f, 1.0f };
@@ -110,8 +125,17 @@ void CAppParcial2::render()
 		// Get a matrix that has both the object rotation and translation
 
 		CVector3 posicion = CVector3::ZeroVector();
-		MathHelper::Matrix4 modelMatrix = MathHelper::SimpleModelMatrixRotationTranslation((float)0.0f, posicion);
+		posicion = currentPosition;
+		posicion.X -= 5;
+		MathHelper::Matrix4 rotationTransalation = MathHelper::SimpleModelMatrixRotationTranslation((float)currentRadians, posicion);
 
+
+
+		MathHelper::Matrix4 translationmatrix = MathHelper::TranslationMatrix(currentPosition.X, currentPosition.Y, currentPosition.Z);
+		MathHelper::Matrix4 rotationMatrix = MathHelper::RotAroundX(currentRadians);
+		MathHelper::Matrix4 modelMatrix2 = MathHelper::Multiply(rotationTransalation, translationmatrix);
+		MathHelper::Matrix4 scaleMatrix = MathHelper::ScaleMatrix(2.0, 2.0, 2.0);
+		MathHelper::Matrix4 modelMatrix = MathHelper::Multiply(translationmatrix, rotationMatrix);
 		unsigned int modelShader = currentShaderID;
 		unsigned int modelVAO = geometryID;
 		unsigned int modelTexture = 0;
@@ -128,6 +152,17 @@ void CAppParcial2::render()
 			objeto3D.getNumFaces(),
 			color,
 			&modelMatrix,
+			COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+			false
+		);
+
+		getOpenGLRenderer()->renderObject(
+			&modelShader,
+			&modelVAO,
+			&modelTexture,
+			objeto3D.getNumFaces(),
+			color,
+			&modelMatrix2,
 			COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
 			false
 		);

@@ -6,7 +6,7 @@
 
 #include "Globals.h"
 #include "CApp.h"
-
+#include "CVector3.h"
 #include "../Include/Parcial-1.h"
 
 // --------------------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +81,14 @@ private:
 	vector<unsigned int> textureID;
 	unsigned int currentShaderID;
 	unsigned int geometryID;
+	
+
+	//11/10/2023
+
+	double rotationSpeed = 90.0f;
+	double rotationActual = 0.0f;
+	CVector3 currentPosition = { 0.0, -10.0 , 30.0 };
+
 };
 
 #endif // !CAPPEMPTY_H
