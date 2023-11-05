@@ -126,25 +126,33 @@ void CAppParcial2::render()
 
 		CVector3 posicion = CVector3::ZeroVector();
 		posicion = currentPosition;
-		posicion.X -= 5;
-		MathHelper::Matrix4 rotationTransalation = MathHelper::SimpleModelMatrixRotationTranslation((float)currentRadians, posicion);
+		posicion.X -= 5.0f;
 
+		MathHelper::Matrix4 scaleMatrix = MathHelper::ScaleMatrix(2.0, 2.0, 2.0);
 
+		MathHelper::Matrix4 rotationAndTranslation = MathHelper::SimpleModelMatrixRotationTranslation((float)currentRadians, posicion);
+
+		MathHelper::Matrix4 modelMatrix2 = MathHelper::Multiply(rotationAndTranslation, scaleMatrix);
 
 		MathHelper::Matrix4 translationmatrix = MathHelper::TranslationMatrix(currentPosition.X, currentPosition.Y, currentPosition.Z);
 		MathHelper::Matrix4 rotationMatrix = MathHelper::RotAroundX(currentRadians);
-		MathHelper::Matrix4 modelMatrix2 = MathHelper::Multiply(rotationTransalation, translationmatrix);
-		MathHelper::Matrix4 scaleMatrix = MathHelper::ScaleMatrix(2.0, 2.0, 2.0);
-		MathHelper::Matrix4 modelMatrix = MathHelper::Multiply(translationmatrix, rotationMatrix);
+		MathHelper::Matrix4 modelMatrix = MathHelper::Multiply(rotationMatrix, translationmatrix);
 		unsigned int modelShader = currentShaderID;
 		unsigned int modelVAO = geometryID;
+		unsigned int modelShader2;
+		unsigned int modelVAO2;
+		for (int i = 0; i < RenderOBJ.size(); i++)
+		{
+			modelShader2 = RenderOBJ[0].ShaderId;
+			modelVAO2 = RenderOBJ[0].GeometryId;
+		}
 		unsigned int modelTexture = 0;
 
 		if (textureID.size() > 0)
 		{
 			modelTexture = textureID[0];
 		}
-
+		textureID;
 		getOpenGLRenderer()->renderObject(
 			&modelShader,
 			&modelVAO,
@@ -166,6 +174,39 @@ void CAppParcial2::render()
 			COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
 			false
 		);
+
+		bool menos = true;
+		MathHelper::Matrix4 Hexgrid;
+		CVector3 posicionhex(-10, -8, 0);
+		for (int j = 0; j < numCols; j++)
+		{
+			for (int i = 0; i < numRows; i++)
+			{
+				Hexgrid = MathHelper::TranslationMatrix(posicionhex.getX(), posicionhex.getY(), posicionhex.getZ());
+				getOpenGLRenderer()->renderObject(
+					&modelShader2,
+					&modelVAO2,
+					&modelTexture,
+					4,
+					color,
+					&Hexgrid,
+					COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+					false
+				);
+				posicionhex.X += sqrt(3) * cellSize;
+			}
+			posicionhex.Z +=   (( - 2 * cellSize) * (.75));
+			if (menos == true)
+			{
+				posicionhex.X = -10 - ((sqrt(3) * cellSize)/2);
+				menos = false;
+			}
+			else
+			{
+				posicionhex.X = -10;
+				menos = true;
+			}
+		}
 
 	}
 }
@@ -192,8 +233,106 @@ void CAppParcial2::executeMenuAction()
 }
 
 
+IDsRender CAppParcial2::memoryGraphic()
+{
+	unsigned int shaderId;
+	unsigned int geometryId2;
+	CVector3 center(0, 0, 0);
+	for (int i = 0; i < 6; i++)
+	{
+		CVector3 temporalVector3 = pointyHexCorner(center, cellSize, i);
+		vertices.push_back(temporalVector3.getX());
+		vertices.push_back(temporalVector3.getY());
+		vertices.push_back(temporalVector3.getZ());
+	}
+
+	shaderId = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_COLOR_OBJECT);
+
+	bool loadedToGraphicsCard = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
+		&shaderId,
+		&geometryId2,
+		vertices.data(),
+		vertices.size(),
+		normales.data(),
+		normales.size(),
+		uvCoords.data(),
+		uvCoords.size(),
+		Vericextotal.data(),
+		Vericextotal.size()/3,
+		Normaltotal.data(),
+		Normaltotal.size()/3,
+		UVCoordstotal.data(),
+		4
+	);
+	if (loadedToGraphicsCard == false)
+	{
+		cout << "No funciono" << endl;
+	}
+	IDsRender IDs;
+	IDs.ShaderId = shaderId;
+	IDs.GeometryId = geometryId2;
+	return IDs;
+}
+
+//void CAppParcial2::memoryGraphic()
+//{
+//	if (!objeto3D.loadFile(multibyteString.c_str()))
+//	{
+//		cout << "Unable to load 3D model" << endl;
+//	}
+//	else
+//	{
+//		setMenuActive(false);
+//		string materialname;
+//		vector<string>* materialsnamedata = objeto3D.getmaterialmtl();
+//		for (int i = 0; i < materialsnamedata->size(); i++)
+//		{
+//			unsigned int ID;
+//			materialname = materialsnamedata->at(i);
+//			if (CTextureLoader::loadTexture(materialname.c_str(), &ID, getOpenGLRenderer()))
+//			{
+//				textureID.push_back(ID);
+//			}
+//		}
+//		if (objeto3D.getconfirmationcoordstexture() && objeto3D.getconfirmationtexture())
+//		{
+//			// Switch shaders to textured object ones
+//			currentShaderID = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_TEXTURED_OBJECT);
+//		}
+//		else
+//		{
+//			// Load color shader
+//			currentShaderID = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_COLOR_OBJECT);
+//		}
+//		vector<unsigned short>* test = objeto3D.getModelVerticexIndices();
+//		bool loadedToGraphicsCard = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
+//			&currentShaderID,
+//			&geometryID,
+//			objeto3D.getModelVertices()->data(),
+//			objeto3D.getNumVertices(),
+//			objeto3D.getModelNormals()->data(),
+//			objeto3D.getNumNormals(),
+//			objeto3D.getModelUvCoords()->data(),
+//			objeto3D.getNumUvCoords(),
+//			objeto3D.getModelVerticexIndices()->data(),
+//			objeto3D.getNumFaces(),
+//			objeto3D.getModelNormalsIndices()->data(),
+//			objeto3D.getNumFaces(),
+//			objeto3D.getModelUvCoordsIndices()->data(),
+//			objeto3D.getNumFaces()
+//		);
+//		if (loadedToGraphicsCard == false)
+//		{
+//			cout << "No funciono" << endl;
+//		}
+//	}
+//}
+
 void CAppParcial2::onF2(int mods)
 {
+	openFile();
+	IDsRender temporealHEX  = memoryGraphic();
+	RenderOBJ.push_back(temporealHEX);
 	setMenuActive(true);
 
 	std::wstring wideStringBuffer = L"";
@@ -244,7 +383,6 @@ void CAppParcial2::onF2(int mods)
 				// Load color shader
 				currentShaderID = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_COLOR_OBJECT);
 			}
-
 			bool loadedToGraphicsCard = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
 				&currentShaderID,
 				&geometryID,
@@ -267,4 +405,134 @@ void CAppParcial2::onF2(int mods)
 			}
 		}
 	}
+}
+
+
+void CAppParcial2::openFile()
+{
+	Vericextotal.push_back(0);
+	Vericextotal.push_back(1);
+	Vericextotal.push_back(5);
+	Vericextotal.push_back(1);
+	Vericextotal.push_back(2);
+	Vericextotal.push_back(5);
+	Vericextotal.push_back(5);
+	Vericextotal.push_back(2);
+	Vericextotal.push_back(4);
+	Vericextotal.push_back(2);
+	Vericextotal.push_back(3);
+	Vericextotal.push_back(4);
+	for (int i = 0; i < 12; i++)
+	{
+		Normaltotal.push_back(0);
+	}
+	for (int i = 0; i < 12; i++)
+	{
+		UVCoordstotal.push_back(0);
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		normales.push_back(0);
+		normales.push_back(1);
+		normales.push_back(0);
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		uvCoords.push_back(0.0f);
+		uvCoords.push_back(0.0f);
+	}
+	std::ifstream archivo("Resources//MEDIA//HEXGRID//hexgrid_cfg.json");
+	if (!archivo.is_open()) {
+		std::cerr << "Error al abrir el archivo JSON." << std::endl;
+		return;
+	}
+
+	json jsondata;
+	archivo >> jsondata;
+
+	numCols = jsondata["HexGrid"]["numCols"];
+	numRows = jsondata["HexGrid"]["numRows"];
+	cellSize = jsondata["HexGrid"]["cellSize"];
+	string temporalOrientation = jsondata["HexGrid"]["orientation"];
+	orientation = temporalOrientation;
+
+	for (const auto& objeto : jsondata["Models"])
+	{
+		std::string nombre = objeto["name"];
+		std::string filename = objeto["filename"];
+
+		//getMemoryGraphic(filename);
+	}
+
+	archivo.close();
+
+
+}
+
+CVector3 CAppParcial2::pointyHexCorner(CVector3 centro, float size, int i)
+{
+	float angle_deg = 60 * i - 30;
+	float angle_rad = 3.1416 / 180 * angle_deg;
+	return CVector3(centro.getX() + (size * cos(angle_rad)), 0, centro.getZ() + (size * sin(angle_rad)));
+}
+
+IDsRender CAppParcial2::getMemoryGraphic(const string& filename)
+{
+	obj3D newobject;
+	unsigned int currentShaderId;
+	unsigned int currentgeometryId;
+	if (!newobject.loadFile(filename))
+	{
+		cout << "Unable to load 3D model" << endl;
+	}
+	else
+	{
+		setMenuActive(false);
+		string materialname;
+		vector<string>* materialsnamedata = newobject.getmaterialmtl();
+		for (int i = 0; i < materialsnamedata->size(); i++)
+		{
+			unsigned int ID;
+			materialname = materialsnamedata->at(i);
+			if (CTextureLoader::loadTexture(materialname.c_str(), &ID, getOpenGLRenderer()))
+			{
+				textureID.push_back(ID);
+			}
+		}
+		if (newobject.getconfirmationcoordstexture() && newobject.getconfirmationtexture())
+		{
+			// Switch shaders to textured object ones
+			currentShaderId = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_TEXTURED_OBJECT);
+		}
+		else
+		{
+			// Load color shader
+			currentShaderId = getOpenGLRenderer()->getShaderProgramID(SHADER_PROGRAM_COLOR_OBJECT);
+		}
+		vector<unsigned short>* test = newobject.getModelVerticexIndices();
+		bool loadedToGraphicsCard = getOpenGLRenderer()->allocateGraphicsMemoryForObject(
+			&currentShaderId,
+			&currentgeometryId,
+			newobject.getModelVertices()->data(),
+			newobject.getNumVertices(),
+			newobject.getModelNormals()->data(),
+			newobject.getNumNormals(),
+			newobject.getModelUvCoords()->data(),
+			newobject.getNumUvCoords(),
+			newobject.getModelVerticexIndices()->data(),
+			newobject.getNumFaces(),
+			newobject.getModelNormalsIndices()->data(),
+			newobject.getNumFaces(),
+			newobject.getModelUvCoordsIndices()->data(),
+			newobject.getNumFaces()
+		);
+		if (loadedToGraphicsCard == false)
+		{
+			cout << "No funciono" << endl;
+		}
+	}
+	IDsRender temporalObjectId;
+	temporalObjectId.GeometryId = currentgeometryId;
+	temporalObjectId.ShaderId = currentShaderId;
+	return temporalObjectId;
 }

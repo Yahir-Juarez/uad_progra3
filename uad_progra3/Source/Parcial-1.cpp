@@ -94,7 +94,8 @@ bool obj3D::loadFile(const string& filename)
 	}
 
 	//Imprime todolo que se guardo
-	for (int i = 0; i < newmtl.size(); i++)
+	
+	/*for (int i = 0; i < newmtl.size(); i++)
 	{
 		cout << "newmtl -> " << newmtl[i] << endl;
 	}
@@ -130,7 +131,7 @@ bool obj3D::loadFile(const string& filename)
 			x += 2;
 		}
 
-	}
+	}*/
 
 	return true;
 }
@@ -141,6 +142,7 @@ void obj3D::LectorMtllib(string nombre_archivo)
 	if (!archivoMtllib.is_open())
 	{
 		cout << "No se pudo abrir\n";
+		return;
 	}
 	else
 	{

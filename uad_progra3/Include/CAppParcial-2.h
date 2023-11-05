@@ -8,6 +8,7 @@
 #include "CApp.h"
 #include "CVector3.h"
 #include "../Include/Parcial-1.h"
+#include "Mundo.h"
 
 // --------------------------------------------------------------------------------------------------------------------------------------
 // Class that inherits from Base class CApp
@@ -22,6 +23,7 @@ private:
 	// ---------------------------------------------------
 	//
 	// ---------------------------------------------------
+	Mundo jsonObjects;
 
 protected:
 
@@ -69,6 +71,8 @@ public:
 	//
 	// -----------------------------------------
 	void onF2(int mods) override;                       // F2
+	IDsRender memoryGraphic();
+	IDsRender getMemoryGraphic(const string& filename);
 
 private:
 
@@ -82,12 +86,29 @@ private:
 	unsigned int currentShaderID;
 	unsigned int geometryID;
 	
+	vector<IDsRender> RenderOBJ;
 
 	//11/10/2023
 
 	double rotationSpeed = 90.0f;
 	double rotationActual = 0.0f;
-	CVector3 currentPosition = { 0.0, -10.0 , 30.0 };
+	CVector3 currentPosition = { 0.0, -15.0 , -10.0 };
+
+	//////////////////////////////////////////Mundo//////////////////////////////
+
+	int numCols;
+	int numRows = 12;
+	float cellSize = 1.75;
+	string orientation;
+
+	CVector3 pointyHexCorner(CVector3 centro, float size, int i = 1);
+	void openFile();
+	vector<float> vertices;
+	vector<float> normales;
+	vector<float> uvCoords;
+	vector<unsigned short> Vericextotal;
+	vector<unsigned short> Normaltotal;
+	vector<unsigned short> UVCoordstotal;
 
 };
 

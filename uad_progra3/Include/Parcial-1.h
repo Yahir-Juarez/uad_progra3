@@ -28,8 +28,6 @@ public:
 	bool getconfirmationtexture() const { return textures; }
 	bool getconfirmationcoordstexture() const { return UVcoordsTextures; }
 
-
-private:
 	vector<string> newmtl;
 	vector<string> map_Kd;
 	bool textures = false;
