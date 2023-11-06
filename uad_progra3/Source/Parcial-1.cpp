@@ -46,22 +46,46 @@ bool obj3D::loadFile(const string& filename)
 			string linea;
 			string palabra;
 			getline(archivo, linea);
+			bool sinNormal = false;
 			istringstream lins(linea);
 			int contador = 0;
 			while (lins >> palabra)
 			{
+				int totalDiagonal = 0;
+				for (int i = 0; i < palabra.size(); i++)
+				{
+					if (palabra[i] == '/')
+					{
+						if (palabra[i+1] == '/')
+						{
+							sinNormal = true;
+						}
+					}
+				}
 				contador++;
 			}
 			//Triangulos
-			if (contador == 3)
+			if (contador == 3 && sinNormal == false)
 			{
 				LectorCaras(linea);
 				faces++;
 			}
 			//Quads
-			else if (contador == 4)
+			else if (contador == 4 && sinNormal == false)
 			{
 				LectorCarasQuads(linea);
+				faces++;
+				faces++;
+			}
+			else if (contador == 3 && sinNormal == true)
+			{
+				LectorCarasNormals(linea);
+				faces++;
+			}
+			//Quads
+			else if (contador == 4 && sinNormal == true)
+			{
+				LectorCarasQuadsNormals(linea);
 				faces++;
 				faces++;
 			}
@@ -207,6 +231,32 @@ istringstream obj3D::LectorCaras(string linea)
 	return lins;
 }
 
+istringstream obj3D::LectorCarasUVs(string linea)
+{
+	istringstream lins(linea);
+	int posicion;
+	char posicionChar = NULL;
+	int vueltas = 0;
+	int f_vuelta = 0;
+
+	for (int i = v_Caras.size() - 1; i < v_Caras.size(); i++)
+	{
+		while (vueltas != 3)
+		{
+			lins >> posicion;
+			v_Caras[i].v_ind_vertices.push_back(posicion - 1);
+			lins >> posicionChar;
+			v_Caras[i].v_ind_uvs.push_back(0);
+			lins >> posicionChar;
+			lins >> posicion;
+			v_Caras[i].v_ind_normales.push_back(posicion - 1);
+			vueltas++;
+		}
+	}
+
+	return lins;
+}
+
 void obj3D::LectorCarasQuads(string linea)
 {
 	int numActual = 0;
@@ -231,6 +281,54 @@ void obj3D::LectorCarasQuads(string linea)
 	}
 }
 
+istringstream obj3D::LectorCarasNormals(string linea)
+{
+	istringstream lins(linea);
+	int posicion;
+	char posicionChar = NULL;
+	int vueltas = 0;
+	int f_vuelta = 0;
+
+	for (int i = v_Caras.size() - 1; i < v_Caras.size(); i++)
+	{
+		while (vueltas != 3)
+		{
+			lins >> posicion;
+			v_Caras[i].v_ind_vertices.push_back(posicion - 1);
+			lins >> posicionChar;
+			v_Caras[i].v_ind_uvs.push_back(0);
+			lins >> posicionChar;
+			lins >> posicion;
+			v_Caras[i].v_ind_normales.push_back(posicion - 1);
+			vueltas++;
+		}
+	}
+
+	return lins;
+}
+
+void obj3D::LectorCarasQuadsNormals(string linea)
+{
+	int numActual;
+	char caracter = NULL;
+	istringstream lins = LectorCarasUVs(linea);
+	for (int i = v_Caras.size() - 1; i < v_Caras.size(); i++)
+	{
+		v_Caras[i].v_ind_vertices.push_back(v_Caras[i].v_ind_vertices[v_Caras[i].v_ind_vertices.size() - 1]);
+		v_Caras[i].v_ind_uvs.push_back(v_Caras[i].v_ind_uvs[v_Caras[i].v_ind_uvs.size() - 1]);
+		v_Caras[i].v_ind_normales.push_back(v_Caras[i].v_ind_normales[v_Caras[i].v_ind_normales.size() - 1]);
+		lins >> numActual;
+		lins >> caracter;
+		lins >> caracter;
+		v_Caras[i].v_ind_vertices.push_back(numActual - 1);
+		v_Caras[i].v_ind_uvs.push_back(0);
+		lins >> numActual;
+		v_Caras[i].v_ind_normales.push_back(numActual - 1);
+		v_Caras[i].v_ind_vertices.push_back(v_Caras[i].v_ind_vertices[v_Caras[i].v_ind_vertices.size() - 5]);
+		v_Caras[i].v_ind_uvs.push_back(v_Caras[i].v_ind_uvs[v_Caras[i].v_ind_uvs.size() - 5]);
+		v_Caras[i].v_ind_normales.push_back(v_Caras[i].v_ind_normales[v_Caras[i].v_ind_normales.size() - 5]);
+	}
+}
 
 //////////////////////////////////////////////Funciones Publicas///////////////////////////////////////////
 

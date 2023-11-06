@@ -14,6 +14,7 @@ struct IDsRender
 {
 	unsigned int ShaderId;
 	unsigned int GeometryId;
+	int numFaces;
 };
 
 class Mundo

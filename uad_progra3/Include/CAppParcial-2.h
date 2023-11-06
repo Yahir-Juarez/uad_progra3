@@ -4,6 +4,8 @@
 #ifndef CAppParcial2_H
 #define CAppParcial2_H
 
+#include <map>
+
 #include "Globals.h"
 #include "CApp.h"
 #include "CVector3.h"
@@ -101,6 +103,7 @@ private:
 	float cellSize = 1.75;
 	string orientation;
 
+
 	CVector3 pointyHexCorner(CVector3 centro, float size, int i = 1);
 	void openFile();
 	vector<float> vertices;
@@ -109,7 +112,20 @@ private:
 	vector<unsigned short> Vericextotal;
 	vector<unsigned short> Normaltotal;
 	vector<unsigned short> UVCoordstotal;
+	map<string, IDsRender> vMapasObjNamesId;
 
+	struct objData
+	{
+		string nameObj;
+		int posRow;
+		int posCol;
+		MathHelper::Matrix4 posicionMatriz;
+		int numFaces;
+	};
+	vector<objData> dataObjs;
+	void renderObj();
+	bool estadoProyecto = false;
+	void runproyecto();
 };
 
 #endif // !CAPPEMPTY_H

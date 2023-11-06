@@ -52,7 +52,10 @@ public:
 
 	vector<Caras> v_Caras;
 	istringstream LectorCaras(string linea);
+	istringstream LectorCarasUVs(string linea);
 	void LectorCarasQuads(string linea);
+	istringstream LectorCarasNormals(string linea);
+	void LectorCarasQuadsNormals(string linea);
 	void LectorGeneral(vector<float>& typeVector, ifstream& archivo);
 	void LectorMtllib(string nombre_archivo);
 };
