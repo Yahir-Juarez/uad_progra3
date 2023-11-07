@@ -100,6 +100,7 @@ void CAppParcial2::update(double deltaTime)
 	if (estadoProyecto == false)
 	{
 		runproyecto();
+		estadoProyecto = true;
 	}
 }
 
@@ -530,7 +531,6 @@ IDsRender CAppParcial2::getMemoryGraphic(const string& filename)
 void CAppParcial2::renderObj()
 {
 	double posicionX = -15;
-	float color[3] = { 1.0f, 1.0f, 1.0f };
 	unsigned int modelTexture = 0;
 	unsigned int modelShader2;
 	unsigned int modelVAO2;
@@ -543,25 +543,27 @@ void CAppParcial2::renderObj()
 	bool menos = true;
 	MathHelper::Matrix4 Hexgrid;
 	CVector3 posicionhex(posicionX, -5, -10);
-	for (int j = 0; j < numCols; j++)
+	for (int j = 0; j < numRows; j++)
 	{
-		for (int i = 0; i < numRows; i++)
+		for (int i = 0; i < numCols; i++)
 		{
+			float colorHEX[3] = { .15f, .61f, .15f };
 			Hexgrid = MathHelper::TranslationMatrix(posicionhex.getX(), posicionhex.getY(), posicionhex.getZ());
 			getOpenGLRenderer()->renderObject(
 				&modelShader2,
 				&modelVAO2,
 				&modelTexture,
 				4,
-				color,
+				colorHEX,
 				&Hexgrid,
 				COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
 				false
 			);
 			for (int k = 0; k < dataObjs.size(); k++)
 			{
-				if (dataObjs[k].posCol == j && dataObjs[k].posRow == i)
+				if (dataObjs[k].posCol == i && dataObjs[k].posRow == j)
 				{
+					float colorOBJ[3] = { 0.0f, .3f, 0.0f };
 					dataObjs[k].posicionMatriz = MathHelper::TranslationMatrix(posicionhex.getX(), posicionhex.getY(), posicionhex.getZ());
 					unsigned int textureId;
 					unsigned int geometryId;
@@ -572,7 +574,7 @@ void CAppParcial2::renderObj()
 						&geometryId,
 						&modelTexture,
 						vMapasObjNamesId[dataObjs[k].nameObj].numFaces,
-						color,
+						colorOBJ,
 						&dataObjs[k].posicionMatriz,
 						COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
 						false
