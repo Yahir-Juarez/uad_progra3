@@ -3,6 +3,7 @@
 #include "../Include/CApp.h"
 
 #define KEY_MOD_SHIFT     0x0001
+#define KEY_MOD_CONTROL   0x0002
 
 Camera::Camera(int framebufferWidth, int framebufferHeight) :
     Camera(framebufferWidth, framebufferHeight, DEFAULT_FIELD_OF_VIEW, DEFAULT_NEAR_PLANE_DISTANCE, DEFAULT_FAR_PLANE_DISTANCE,
@@ -63,6 +64,10 @@ void Camera::recalculateViewMatrix()
 
     m_localUp = forward.cross(m_right);
 
+    m_right.X = abs(m_right.X);
+    m_right.Y = abs(m_right.Y);
+    m_right.Z = abs(m_right.Z);
+
     m_viewMatrix = MathHelper::ViewMatrix(m_eyePos, m_lookAt, m_localUp);
 
     m_cacheValid = true;
@@ -88,6 +93,11 @@ void Camera::moveForward(float deltaMove, int mods)
         {
             deltaMove *= 5;
         }
+        if (mods & KEY_MOD_CONTROL)
+        {
+            moveUp(deltaMove, mods);
+            return;
+        }
 
         forward *= deltaMove;
 
@@ -107,6 +117,16 @@ void Camera::moveBackward(float deltaMove, int mods)
         CVector3 forward = m_lookAt - m_eyePos;
         forward.normalize();
 
+        if (mods & KEY_MOD_SHIFT)
+        {
+            deltaMove *= 5;
+        }
+        if (mods & KEY_MOD_CONTROL)
+        {
+            moveDown(deltaMove, mods);
+            return;
+        }
+
         forward *= -deltaMove;
 
         m_eyePos += forward;
@@ -119,12 +139,34 @@ void Camera::moveBackward(float deltaMove, int mods)
 
 void Camera::moveUp(float deltaMove, int mods)
 {
+    if (fabs(deltaMove) > 0.001f)
+    {
+        CVector3 forward(0.0f, 1.0f, 0.0f);
 
+        forward *= deltaMove;
+
+        m_eyePos += forward;
+        m_lookAt += forward;
+
+        // Recalcular la view-matrix cuando se llame getViewMatrix()
+        m_cacheValid = false;
+    }
 }
 
 void Camera::moveDown(float deltaMove, int mods)
 {
+    if (fabs(deltaMove) > 0.001f)
+    {
+        CVector3 forward(0.0f, 1.0f, 0.0f);
 
+        forward *= deltaMove;
+
+        m_eyePos -= forward;
+        m_lookAt -= forward;
+
+        // Recalcular la view-matrix cuando se llame getViewMatrix()
+        m_cacheValid = false;
+    }
 }
 
 void Camera::strafe(float deltaMove, int mods)

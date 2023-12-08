@@ -1,7 +1,22 @@
 #include "../Include/QuadtreeNode.h"
+QuadtreeNode::QuadtreeNode() {
+	m_bottomLeft = new QuadtreeNode();
+	m_topRight = new QuadtreeNode();
+	m_bottomLeft = new QuadtreeNode();
+	m_bottomRight = new QuadtreeNode();
+}
 
-void QuadtreeNode::creatQuadtreeNodes(int numRows, int numColum, vector<cell*> m_newCells)
+void QuadtreeNode::creatQuadtreeNodes(int numRows, int numColum, vector<cell*> m_newCells, CVector3& puntoInicio, int cellSize)
 {
+	puntoInicio.X -= (sqrt(3)* cellSize) / 2;
+	puntoInicio.Z -= (((2 * cellSize) * (.75))) / 2;
+	m_nodeLimits.m_points[0] = puntoInicio;
+	puntoInicio.X += numRows * (sqrt(3) * cellSize);
+	m_nodeLimits.m_points[1] = puntoInicio;
+	puntoInicio.Z += ((2 * cellSize) * (.75));
+	m_nodeLimits.m_points[3] = puntoInicio;
+	puntoInicio.X -= numRows * (sqrt(3) * cellSize);
+	m_nodeLimits.m_points[2] = puntoInicio;
 	int EstandarFaces = 40;
 	int caras_totales = 0;
 	for (int i = 0; i < m_newCells.size(); i++)
@@ -59,10 +74,10 @@ void QuadtreeNode::creatQuadtreeNodes(int numRows, int numColum, vector<cell*> m
 			}
 		}
 	}
-	m_topLeft->creatQuadtreeNodes(indexRow, indexCol, cellTopLeft);
-	m_topRight->creatQuadtreeNodes(numRows - indexRow, indexCol, cellTopLeft);
-	m_topLeft->creatQuadtreeNodes(indexRow, numColum - indexCol, cellTopLeft);
-	m_topLeft->creatQuadtreeNodes(numRows - indexRow, numColum - indexCol, cellTopLeft);
+	m_topLeft->creatQuadtreeNodes(indexRow, indexCol, cellTopLeft, puntoInicio, cellSize);
+	m_topRight->creatQuadtreeNodes(numRows - indexRow, indexCol, cellTopLeft, puntoInicio, cellSize);
+	m_topLeft->creatQuadtreeNodes(indexRow, numColum - indexCol, cellTopLeft, puntoInicio, cellSize);
+	m_topLeft->creatQuadtreeNodes(numRows - indexRow, numColum - indexCol, cellTopLeft, puntoInicio, cellSize);
 
 
 
@@ -129,4 +144,25 @@ void QuadtreeNode::creatQuadtreeNodes(int numRows, int numColum, vector<cell*> m
 	//		sectors.erase(sectors.begin() + i);
 	//	}
 	//}
+}
+
+void QuadtreeNode::render(Camera* cam, vector<cell*> visibleCells)
+{
+	if (cam->isAABBVisible(m_nodeLimits))
+	{
+		if (m_nodoCells.size() > 0)
+		{
+			for (int i = 0; i < m_nodoCells.size(); i++)
+			{
+				visibleCells.push_back(m_nodoCells[i]);
+			}
+		}
+		else
+		{
+			m_topLeft->render(cam, visibleCells);
+			m_topRight->render(cam, visibleCells);
+			m_bottomLeft->render(cam, visibleCells);
+			m_bottomRight->render(cam, visibleCells);
+		}
+	}
 }

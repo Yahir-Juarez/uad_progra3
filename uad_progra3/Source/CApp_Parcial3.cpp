@@ -54,7 +54,7 @@ CAppParcial3::~CAppParcial3()
 void CAppParcial3::initialize()
 {
 	instalinzeWorld(2000, 1000);
-	nodosQuadtrees = new QuadtreeNode();
+	//nodosQuadtrees = new QuadtreeNode();
 	runproyecto();
 	getCells();
 	
@@ -72,7 +72,9 @@ void CAppParcial3::initialize()
 			cout << "Nombre -> " << m_nodes_cells[i]->objetos[j]->nameObj << " Columna -> " << m_nodes_cells[i]->objetos[j]->posCol << " Fila -> " << m_nodes_cells[i]->objetos[j]->posRow << endl;
 		}
 	}
-	nodosQuadtrees->creatQuadtreeNodes(numRows, numCols, m_nodes_cells);
+	double posicionX = -15;
+	CVector3 posicionhex(posicionX, -5, -10);
+	nodosQuadtrees->creatQuadtreeNodes(numRows, numCols, m_nodes_cells, posicionhex, cellSize);
 }
 
 /* */
@@ -562,7 +564,78 @@ void CAppParcial3::renderObj()
 	bool menos = true;
 	MathHelper::Matrix4 Hexgrid;
 	CVector3 posicionhex(posicionX, -5, -10);
+
+
+	////////////////////////////////////////// Render optimizado ///////////////////////////////////////////////
+	vector<cell*> renderTemporal;
+	nodosQuadtrees->render(m_camera, renderTemporal);
 	for (int j = 0; j < numRows; j++)
+	{
+		for (int i = 0; i < numCols; i++)
+		{
+			float colorHEX[3] = { .15f, .61f, .15f };
+			Hexgrid = MathHelper::TranslationMatrix(posicionhex.getX(), posicionhex.getY(), posicionhex.getZ());
+			MathHelper::Matrix4* viewMatrix = (MathHelper::Matrix4*)m_camera->getViewMatrix();
+			MathHelper::Matrix4* projectionMatrix = (MathHelper::Matrix4*)m_camera->getProjectionMatrix();
+			getOpenGLRenderer()->renderObject(
+				&modelShader2,
+				&modelVAO2,
+				&modelTexture,
+				4,
+				colorHEX,
+				&Hexgrid,
+				viewMatrix,
+				projectionMatrix,
+				COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+				false
+			);
+			for (int k = 0; k < renderTemporal.size(); k++)
+			{
+				if (renderTemporal[k]->posCol == i && renderTemporal[k]->posRow == j)
+				{
+					float colorOBJ[3] = { 0.0f, .3f, 0.0f };
+					for (int x = 0; x < renderTemporal[k]->objetos.size(); x++)
+					{
+						renderTemporal[k]->objetos[x]->posicionMatriz = MathHelper::TranslationMatrix(posicionhex.getX(), posicionhex.getY(), posicionhex.getZ());
+						unsigned int textureId;
+						unsigned int geometryId;
+						geometryId = renderTemporal[k]->objetos[x]->ptrIDsData->GeometryId;
+						textureId = renderTemporal[k]->objetos[x]->ptrIDsData->ShaderId;
+						MathHelper::Matrix4* viewMatrix = (MathHelper::Matrix4*)m_camera->getViewMatrix();
+						MathHelper::Matrix4* projectionMatrix = (MathHelper::Matrix4*)m_camera->getProjectionMatrix();
+						getOpenGLRenderer()->renderObject(
+							&textureId,
+							&geometryId,
+							&modelTexture,
+							renderTemporal[k]->objetos[x]->numFaces,
+							colorOBJ,
+							&renderTemporal[k]->objetos[x]->posicionMatriz,
+							viewMatrix,
+							projectionMatrix,
+							COpenGLRenderer::EPRIMITIVE_MODE::TRIANGLES,
+							false
+						);
+					}
+				}
+			}
+			posicionhex.X += sqrt(3) * cellSize;
+		}
+		posicionhex.Z += ((2 * cellSize) * (.75));
+		if (menos == true)
+		{
+			posicionhex.X = posicionX - ((sqrt(3) * cellSize) / 2);
+			menos = false;
+		}
+		else
+		{
+			posicionhex.X = posicionX;
+			menos = true;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*for (int j = 0; j < numRows; j++)
 	{
 		for (int i = 0; i < numCols; i++)
 		{
@@ -610,7 +683,7 @@ void CAppParcial3::renderObj()
 			}
 			posicionhex.X += sqrt(3) * cellSize;
 		}
-		posicionhex.Z += ((-2 * cellSize) * (.75));
+		posicionhex.Z += ((2 * cellSize) * (.75));
 		if (menos == true)
 		{
 			posicionhex.X = posicionX - ((sqrt(3) * cellSize) / 2);
@@ -621,7 +694,7 @@ void CAppParcial3::renderObj()
 			posicionhex.X = posicionX;
 			menos = true;
 		}
-	}
+	}*/
 }
 
 void CAppParcial3::runproyecto()
